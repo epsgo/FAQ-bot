@@ -1,11 +1,20 @@
 from aiogram import Router, F
 from db import *
-from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove
+from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram import types
 from const import ADMIN_BTNS, ADMIN_IDS, TEXTS
-from keyboards import get_main_menu
+from keyboards import get_main_menu, get_start_kb
 
 router = Router()
+
+
+@router.callback_query.middleware()
+async def admin_only(handler, callback: CallbackQuery, data: dict):
+    if callback.from_user.id not in ADMIN_IDS:
+        await callback.answer("⛔ Access denied", show_alert=True)
+        return
+    return await handler(callback, data)
+
 
 def get_admin_main_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -91,6 +100,7 @@ async def process_approve(callback: CallbackQuery):
     approve_user(user_id)
     
     user = get_user(user_id)
+
     try:
         await callback.bot.send_message(
             user_id, 
@@ -99,7 +109,11 @@ async def process_approve(callback: CallbackQuery):
         )
     except Exception:
         pass
-    await callback.answer()
+
+    await callback.answer(f"✅ {user['full_name']} approved")
+
+    await show_pending(callback)
+
 
 @router.callback_query(F.data == "back_to_admin")
 async def back_to_admin(callback: CallbackQuery):
@@ -111,31 +125,13 @@ async def process_delete_user(callback: CallbackQuery):
     data = callback.data.split("_")
     user_id = int(data[2])
     source = data[3]
-    
-    delete_user(user_id)
-    
-    back_target = "admin_pending" if source == "pending" else "admin_all_users"
-    
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="⬅️ Back", callback_data=back_target)]
-    ])
-    
-    await callback.message.edit_text("✅ User deleted successfully.", reply_markup=kb)
-    await callback.answer()
-    
-    await show_pending(callback) 
+    user = get_user(user_id)
 
-@router.callback_query(F.data.startswith("delete_user_"))
-async def process_delete(callback: CallbackQuery):
-    data = callback.data.split("_")
-    user_id = int(data[2]) 
-    source = data[3] 
-    
     try:
         await callback.bot.send_message(
-            chat_id=user_id, 
-            text=")))))))))))))))))", 
-            reply_markup=ReplyKeyboardRemove() 
+            chat_id=user_id,
+            text="Your account was deleted.",
+            reply_markup=get_start_kb()
         )
     except Exception as e:
         print(f"Could not notify user {user_id}: {e}")
@@ -147,7 +143,4 @@ async def process_delete(callback: CallbackQuery):
     else:
         await show_all_users(callback)
 
-
-@router.callback_query(F.data == "back_to_admin")
-async def back_to_admin(callback: types.CallbackQuery):
-    await callback.message.edit_text("⚙️ Admin Panel", reply_markup=get_admin_main_kb())
+    await callback.answer(f"Agent {user['full_name']} deleted")

@@ -1,22 +1,34 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
-from aiogram.filters import CommandStart, Command
+from aiogram.filters import CommandStart
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import StatesGroup, State
 from datetime import datetime
-from db import *
+from db import get_user, add_user, approve_user
 from const import TEXTS, ADMIN_IDS
 from keyboards import get_main_menu
 
 router = Router()
-registration_state = {}
+
+
+class RegistrationState(StatesGroup):
+    waiting_name = State()
+    waiting_birthdate = State()
+
 
 @router.message(CommandStart())
-async def start(message: Message):
+async def start(message: Message, state: FSMContext):
     user = get_user(message.from_user.id)
-    
+
     if user:
-        is_admin = message.from_user.id in ADMIN_IDS
-        await message.answer(TEXTS[user['language']]['welcome_back'],
+        user_id = message.from_user.id
+        is_admin = user_id in ADMIN_IDS
+        if is_admin and not user.get("is_approved"):
+            approve_user(user_id)
+            user["is_approved"] = True
+        await message.answer(
+            TEXTS[user['language']]['welcome_back'],
             reply_markup=get_main_menu(user['language'], is_admin=is_admin)
         )
         return
@@ -29,47 +41,65 @@ async def start(message: Message):
 
     await message.answer("Choose your language:", reply_markup=kb.as_markup())
 
-@router.callback_query(F.data.startswith("lang_"))
-async def set_language(callback: CallbackQuery):
-    lang = callback.data.split("_")[1]
-    user_id = callback.from_user.id
 
-    registration_state[user_id] = {"language": lang}
+@router.callback_query(F.data.startswith("lang_"))
+async def set_language(callback: CallbackQuery, state: FSMContext):
+    if get_user(callback.from_user.id):
+        await callback.answer()
+        return
+
+    lang = callback.data.split("_")[1]
+    await state.set_state(RegistrationState.waiting_name)
+    await state.update_data(language=lang)
     await callback.message.answer(TEXTS[lang]["ask_name"])
     await callback.answer()
 
-@router.message()
-async def handle_messages(message: Message):
-    user_id = message.from_user.id
 
-    if user_id not in registration_state:
+@router.message(RegistrationState.waiting_name)
+async def handle_name(message: Message, state: FSMContext):
+    data = await state.get_data()
+    lang = data["language"]
+
+    if not message.text:
+        await message.answer(TEXTS[lang]["ask_name"])
         return
 
-    state = registration_state[user_id]
-    lang = state["language"]
+    await state.update_data(full_name=message.text)
+    await state.set_state(RegistrationState.waiting_birthdate)
+    await message.answer(TEXTS[lang]["ask_birth"])
 
-    if "full_name" not in state:
-        state["full_name"] = message.text
+
+@router.message(RegistrationState.waiting_birthdate)
+async def handle_birthdate(message: Message, state: FSMContext):
+    data = await state.get_data()
+    lang = data["language"]
+
+    if not message.text:
         await message.answer(TEXTS[lang]["ask_birth"])
         return
 
-    if "birthdate" not in state:
-        try:
-            birth = datetime.strptime(message.text, "%d.%m.%Y").date()
-            add_user(user_id, state["full_name"], birth.isoformat(), lang)
-            
-            await message.answer(TEXTS[lang]["wait_approval"]) 
-            
+    try:
+        birth = datetime.strptime(message.text, "%d.%m.%Y").date()
+        user_id = message.from_user.id
+        add_user(user_id, data["full_name"], birth.isoformat(), lang)
+        await state.clear()
+
+        if user_id in ADMIN_IDS:
+            approve_user(user_id)
+            await message.answer(
+                TEXTS[lang]["registered"],
+                reply_markup=get_main_menu(lang, is_admin=True)
+            )
+        else:
+            await message.answer(TEXTS[lang]["wait_approval"])
+
             for admin_id in ADMIN_IDS:
                 try:
                     await message.bot.send_message(
-                        admin_id, 
-                        f"🔔 New registration request!\nFull name: {state['full_name']}\nID: {user_id}"
+                        admin_id,
+                        f"🔔 New registration request!\nFull name: {data['full_name']}\nID: {user_id}"
                     )
                 except Exception:
                     continue
-                
-            registration_state.pop(user_id)
-        except ValueError:
-            await message.answer(TEXTS[lang]["ask_birth"])
-
+    except ValueError:
+        await message.answer(TEXTS[lang]["ask_birth"])

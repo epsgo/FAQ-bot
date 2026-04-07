@@ -32,7 +32,8 @@ TEXTS = {
         "independence": "С Днём Независимости Украины!",
         "constitution": "📜 С Днём Конституции Украины!",
         "easter": "🐣 С Пасхой!",
-        "welcome_back": "С возвращением!"
+        "welcome_back": "С возвращением!",
+        "faq_title": "❓ Часто задаваемые вопросы"
     },
     "ua": {
         "signNDA": "✍️ Підписати контракт про нерозголошення",
@@ -60,7 +61,8 @@ TEXTS = {
         "independence": "З Днем Незалежності України!",
         "constitution": "📜 З Днем Конституції України!",
         "easter": "🐣 З Великоднем!",
-        "welcome_back": "З поверненням!"
+        "welcome_back": "З поверненням!",
+        "faq_title": "❓ Часті питання"
     },
     "en": {
         "signNDA": "✍️ Sign a non-disclosure agreement",
@@ -88,33 +90,34 @@ TEXTS = {
         "independence": "Happy Independence Day (Ukraine)!",
         "constitution": "📜 Happy Constitution Day (Ukraine)!",
         "easter": "🐣 Happy Easter!",
-        "welcome_back": "Welcome back!"
+        "welcome_back": "Welcome back!",
+        "faq_title": "❓ Frequently Asked Questions"
     }
 }
 
 MENU_BUTTONS = {
     "ru": {
         "btn_profile": "👤 Профиль",
-        "btn_faq": "❓ FAQ",
-        "btn_test": "📝 Тест",
-        "btn_meeting": "📅 Встреча",
-        "btn_rate": "⭐ Оценить",
+        "btn_faq": "❓ Частые вопросы",
+        "btn_test": "📝 Пройти тест",
+        "btn_meeting": "📅 Запрос встречи",
+        "btn_rate": "⭐ Оценить бота",
         "btn_admin": "⚙️ Админ"
     },
     "ua": {
         "btn_profile": "👤 Профіль",
-        "btn_faq": "❓ FAQ",
-        "btn_test": "📝 Тест",
-        "btn_meeting": "📅 Зустріч",
-        "btn_rate": "⭐ Оцінити",
+        "btn_faq": "❓ Часті питання",
+        "btn_test": "📝 Пройти тест",
+        "btn_meeting": "📅 Запит зустрічі",
+        "btn_rate": "⭐ Оцінити бота",
         "btn_admin": "⚙️ Адмін"
     },
     "en": {
         "btn_profile": "👤 Profile",
         "btn_faq": "❓ FAQ",
-        "btn_test": "📝 Test",
-        "btn_meeting": "📅 Meeting",
-        "btn_rate": "⭐ Rate",
+        "btn_test": "📝 Take Test",
+        "btn_meeting": "📅 Request Meeting",
+        "btn_rate": "⭐ Rate Bot",
         "btn_admin": "⚙️ Admin"
     }
 }

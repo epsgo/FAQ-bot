@@ -12,7 +12,7 @@ from const import TEXTS, MENU_BUTTONS
 
 router = Router()
 
-SPREADSHEET_ID = "1-wanGN5Q-tEutapXrOzqvg5EEzNUqlwLstyKcc1PiCk"
+SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
 
 class FeedbackState(StatesGroup):
     waiting_for_rate = State()
@@ -28,7 +28,7 @@ def append_feedback_to_sheet(row):
             "token_uri": os.getenv("FIREBASE_TOKEN_URI"),
         })
         sh = gc.open_by_key(SPREADSHEET_ID)
-        worksheet = sh.get_worksheet(0) # Берем первый лист
+        worksheet = sh.get_worksheet(0) 
         worksheet.append_row(row)
     except Exception as e:
         print(f"Excel Error: {e}")
@@ -62,10 +62,14 @@ async def process_rate(callback: CallbackQuery, state: FSMContext):
 @router.message(FeedbackState.waiting_for_text)
 @auth_required
 async def process_feedback_text(message: Message, state: FSMContext, user: dict):
+    if not message.text:
+        await message.answer("Please send a text message.")
+        return
+
     data = await state.get_data()
     stars = data.get("stars")
     comment = message.text
-    
+
     row = [
         datetime.now().strftime("%d.%m.%Y %H:%M"),
         str(message.from_user.id),

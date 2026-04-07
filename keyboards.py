@@ -1,10 +1,16 @@
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton, Message, CallbackQuery, ReplyKeyboardRemove
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, Message, CallbackQuery, ReplyKeyboardRemove
 
 from functools import wraps
 from db import get_user
-
 from const import MENU_BUTTONS
+
+def get_start_kb() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="Start Registration")]],
+        resize_keyboard=True
+    )
+
 
 def get_main_menu(lang: str, is_admin: bool = False) -> ReplyKeyboardMarkup:
     builder = ReplyKeyboardBuilder()
@@ -38,7 +44,7 @@ def auth_required(handler):
         if not user:
             msg = "Please complete registration first using /start 😊"
             if isinstance(event, Message):
-                await event.answer(msg)
+                await event.answer(msg, reply_markup=get_start_kb())
             elif isinstance(event, CallbackQuery):
                 await event.answer(msg, show_alert=True)
             return
@@ -46,7 +52,7 @@ def auth_required(handler):
         if not user.get("is_approved", False):
             msg = "⏳ Thanks for registering! An administrator is reviewing your request. Please hang tight, you’ll be notified soon."
             if isinstance(event, Message):
-                await event.answer(msg)
+                await event.answer(msg, reply_markup=get_start_kb())
             elif isinstance(event, CallbackQuery):
                 await event.answer(msg, show_alert=True)
             return
