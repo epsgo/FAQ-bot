@@ -6,6 +6,7 @@ from aiogram import Bot, Dispatcher, Router
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ErrorEvent
+from aiogram.exceptions import TelegramBadRequest
 
 from registration import router as registration_router
 from holidays import holiday_checker
@@ -15,6 +16,7 @@ from rate import router as rate_router
 from faq import router as faq_router
 from mini_test import router as test_router
 from onboarding import router as onboarding_router, onboarding_scheduler
+from meeting import router as meeting_router
 
 load_dotenv()
 
@@ -39,11 +41,10 @@ async def _run_forever(coro_fn, *args, name: str):
             logger.error("[%s] упала: %s — перезапуск через 10с", name, e, exc_info=True)
             await asyncio.sleep(10)
 
-
-
 async def main():
     dp.include_router(admin_router)
     dp.include_router(onboarding_router)
+    dp.include_router(meeting_router)
     dp.include_router(profile_router)
     dp.include_router(rate_router)
     dp.include_router(faq_router)
@@ -52,6 +53,8 @@ async def main():
 
     @dp.error()
     async def error_handler(event: ErrorEvent):
+        if isinstance(event.exception, TelegramBadRequest) and "message is not modified" in str(event.exception):
+            return
         logger.error("Необработанная ошибка: %s", event.exception, exc_info=event.exception)
 
     asyncio.create_task(_run_forever(holiday_checker, bot, name="holiday_checker"))

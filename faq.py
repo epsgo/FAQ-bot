@@ -3,13 +3,16 @@ import json
 import os
 import re
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
-from const import FAQ_BTNS, TEXTS
+from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile, InputMediaPhoto
+from const import FAQ_BTNS, TEXTS, NDA_INSTRUCTION
 from keyboards import auth_required
 
 router = Router()
 
-FAQ_DELETE_DELAY = 12 * 60 * 60 
+FAQ_DELETE_DELAY = 12 * 60 * 60
+# (chat_id, text_msg_id) -> [photo_msg_id, ...]  — для удаления фото при нажатии Back
+_pending_photo_deletions: dict[tuple, list[int]] = {}
+
 with open("faq_data.json", encoding="utf-8") as f:
     FAQ_DATA = json.load(f)["categories"]
 
@@ -79,6 +82,14 @@ async def show_category(callback: CallbackQuery):
     cat = FAQ_DATA[cat_idx]
     title = f"{cat['icon']} {cat['titles'][lang]}"
 
+    # Удалить фото-сообщения, если они были отправлены отдельно от текста
+    key = (callback.message.chat.id, callback.message.message_id)
+    for photo_id in _pending_photo_deletions.pop(key, []):
+        try:
+            await callback.bot.delete_message(callback.message.chat.id, photo_id)
+        except Exception:
+            pass
+
     if callback.message.photo:
         await callback.message.delete()
         sent = await callback.message.answer(title, reply_markup=get_questions_kb(cat_idx, lang))
@@ -107,6 +118,9 @@ async def show_answer(callback: CallbackQuery):
 
     answer_text = q['a'][lang]
 
+    if answer_text == "::NDA_INSTRUCTION::":
+        answer_text = NDA_INSTRUCTION[lang]
+
     if "![" in answer_text and "](" in answer_text:
         image_pattern = r'!\[.*?\]\((.*?)\)'
         image_paths = re.findall(image_pattern, answer_text)
@@ -116,32 +130,54 @@ async def show_answer(callback: CallbackQuery):
         if existing_images:
             await callback.message.delete()
 
-            for img_path in existing_images:
-                sent_photo = await callback.message.answer_photo(photo=FSInputFile(img_path))
-                schedule_delete(sent_photo)
-
             full_text = f"<b>{q['q'][lang]}</b>\n\n{text_without_images}"
 
-            if len(full_text) > 4096:
-                chunks = []
-                current_chunk = f"<b>{q['q'][lang]}</b>\n\n"
-                for para in text_without_images.split('\n\n'):
-                    if len(current_chunk) + len(para) + 2 < 4096:
-                        current_chunk += para + "\n\n"
-                    else:
-                        chunks.append(current_chunk.strip())
-                        current_chunk = para + "\n\n"
-                if current_chunk.strip():
-                    chunks.append(current_chunk.strip())
-
-                for chunk in chunks[:-1]:
-                    sent = await callback.message.answer(chunk, parse_mode="HTML")
+            if len(existing_images) == 1:
+                if len(full_text) <= 1024:
+                    # Одно сообщение: фото + подпись + кнопка
+                    sent = await callback.message.answer_photo(
+                        photo=FSInputFile(existing_images[0]),
+                        caption=full_text,
+                        parse_mode="HTML",
+                        reply_markup=back_kb
+                    )
                     schedule_delete(sent)
-                sent = await callback.message.answer(chunks[-1], reply_markup=back_kb, parse_mode="HTML")
-                schedule_delete(sent)
+                else:
+                    # Фото отдельно, длинный текст отдельно
+                    sent_photo = await callback.message.answer_photo(photo=FSInputFile(existing_images[0]))
+                    schedule_delete(sent_photo)
+                    sent_text = await callback.message.answer(full_text[:4096], reply_markup=back_kb, parse_mode="HTML")
+                    schedule_delete(sent_text)
+                    _pending_photo_deletions[(callback.message.chat.id, sent_text.message_id)] = [sent_photo.message_id]
             else:
-                sent = await callback.message.answer(full_text, reply_markup=back_kb, parse_mode="HTML")
-                schedule_delete(sent)
+                # Несколько фото — отправить как медиагруппу
+                media = [InputMediaPhoto(media=FSInputFile(p)) for p in existing_images]
+                sent_messages = await callback.message.answer_media_group(media=media)
+                for sent in sent_messages:
+                    schedule_delete(sent)
+                photo_ids = [s.message_id for s in sent_messages]
+
+                # Текст + кнопка отдельным сообщением
+                if len(full_text) > 4096:
+                    chunks = []
+                    current_chunk = f"<b>{q['q'][lang]}</b>\n\n"
+                    for para in text_without_images.split('\n\n'):
+                        if len(current_chunk) + len(para) + 2 < 4096:
+                            current_chunk += para + "\n\n"
+                        else:
+                            chunks.append(current_chunk.strip())
+                            current_chunk = para + "\n\n"
+                    if current_chunk.strip():
+                        chunks.append(current_chunk.strip())
+                    for chunk in chunks[:-1]:
+                        sent = await callback.message.answer(chunk, parse_mode="HTML")
+                        schedule_delete(sent)
+                    sent_text = await callback.message.answer(chunks[-1], reply_markup=back_kb, parse_mode="HTML")
+                    schedule_delete(sent_text)
+                else:
+                    sent_text = await callback.message.answer(full_text, reply_markup=back_kb, parse_mode="HTML")
+                    schedule_delete(sent_text)
+                _pending_photo_deletions[(callback.message.chat.id, sent_text.message_id)] = photo_ids
         else:
             await callback.message.edit_text(
                 f"<b>{q['q'][lang]}</b>\n\n{text_without_images}",

@@ -1,15 +1,12 @@
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
-import aiohttp
-import os
+from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from datetime import datetime
 from db import get_user, update_language, update_full_name, update_birthdate
-from const import PROFILE_BTNS, TEXTS, ADMIN_IDS, DISCORD_WEBHOOK
+from const import PROFILE_BTNS, TEXTS, ADMIN_IDS
 from keyboards import auth_required, get_main_menu
 
-NDA_FILE_PATH = "nda_contract.pdf"
 router = Router()
 
 
@@ -21,7 +18,6 @@ class ProfileEditState(StatesGroup):
 def get_profile_kb(lang):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text=TEXTS[lang]["edit_info"], callback_data="edit_profile")],
-        [InlineKeyboardButton(text=TEXTS[lang]["signNDA"], callback_data="signNDA")]
     ])
 
 
@@ -120,55 +116,6 @@ async def set_language_callback(callback: CallbackQuery):
     await callback.message.delete()
     await callback.answer()
 
-
-@router.callback_query(F.data == "signNDA")
-async def send_nda_instruction(callback: CallbackQuery):
-    user = get_user(callback.from_user.id)
-    if not user or not user.get("is_approved"):
-        await callback.answer("⛔ Access denied", show_alert=True)
-        return
-    lang = user['language']
-
-    if not os.path.exists(NDA_FILE_PATH):
-        await callback.answer("File not found", show_alert=True)
-        return
-
-    await callback.message.answer_document(
-        FSInputFile(NDA_FILE_PATH),
-        caption=TEXTS[lang].get("nda", "signNDA")
-    )
-    await callback.answer()
-
-
-@router.message(F.document)
-@auth_required
-async def handle_any_document(message: Message, user: dict):
-    if not DISCORD_WEBHOOK:
-        await message.answer("Error: webhook not configured")
-        return
-
-    document = message.document
-    lang = user['language']
-    file_info = await message.bot.get_file(document.file_id)
-    file_content = await message.bot.download_file(file_info.file_path)
-
-    try:
-        async with aiohttp.ClientSession() as session:
-            form = aiohttp.FormData()
-            form.add_field("content", f"NDA от: {user['full_name']}")
-            form.add_field(
-                "file",
-                file_content.getvalue(),
-                filename=document.file_name,
-                content_type="application/octet-stream"
-            )
-            async with session.post(DISCORD_WEBHOOK, data=form) as response:
-                if response.status in [200, 204]:
-                    await message.answer(TEXTS[lang].get("filesent", "File sent successfully 🚀"))
-                else:
-                    await message.answer("Error")
-    except Exception:
-        await message.answer("Error")
 
 
 @router.callback_query(F.data == "edit_name")

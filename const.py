@@ -3,13 +3,9 @@ from dotenv import load_dotenv
 load_dotenv()
 admin_raw = os.getenv("ADMIN_IDS", "")
 ADMIN_IDS = {int(i.strip()) for i in admin_raw.split(",") if i.strip()}
-DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK")
 TEXTS = {
     "ru": {
-        "signNDA": "✍️ Подписать контракт о неразглашении",
-        "nda": "Подпиши уебище",
-        "wait_approval": "Спасибо за регистрацию! Администратор рассматривает вашу заявку. Пожалуйста, подождите немного, вы скоро получите уведомление.",
-        "filesent": "Файл успешно отправлен 🚀",
+        "wait_approval":"Спасибо за регистрацию! Администратор рассматривает вашу заявку. Пожалуйста, подождите немного, вы скоро получите уведомление.",
         "choose_lang": "Выберите язык:",
         "choose_info": "Выберите, что хотите изменить:",
         "edit_info": "✏️ Редактировать информацию",
@@ -49,12 +45,29 @@ TEXTS = {
         "test_text_only": "Пожалуйста, отправьте текстовый ответ.",
         "test_cancel_btn": "❌ Выйти с теста",
         "test_cancelled_discarded": "Тест прерван.",
+        "meet_menu_title": "📅 С кем вы хотите провести мит?",
+        "meet_btn_manager": "👔 С менеджером",
+        "meet_btn_teamlead": "👑 С тимлидом",
+        "meet_btn_mentor": "🎓 Запросить ментора",
+        "meet_no_available": "❌ Сейчас нет доступных пользователей.",
+        "meet_select_manager": "Выберите менеджера:",
+        "meet_select_teamlead": "Выберите тимлида:",
+        "meet_select_mentor": "🎓 Выберите менеджера для запроса ментора:",
+        "meet_sent": "✅ Запрос на встречу отправлен!",
+        "meet_mentor_sent": "✅ Запрос на ментора отправлен!",
+        "meet_error": "❌ Не удалось отправить запрос. Попробуйте позже.",
+        "meet_incoming_11": "📅 <b>{name}</b> хочет провести встречу 1:1 с вами.",
+        "meet_incoming_mentor": "🎓 <b>{name}</b> запросил ментора на 1 смену.",
+        "meet_btn_confirm": "✅ Принять",
+        "meet_btn_decline": "❌ Отклонить",
+        "meet_confirmed_by": "✅ <b>{name}</b> принял ваш запрос на встречу 1:1!",
+        "meet_declined_by": "❌ <b>{name}</b> отклонил ваш запрос на встречу 1:1.",
+        "meet_you_confirmed": "✅ Вы приняли запрос на встречу.",
+        "meet_you_declined": "❌ Вы отклонили запрос на встречу.",
+        "meet_back": "⬅️ Назад",
     },
     "ua": {
-        "signNDA": "✍️ Підписати контракт про нерозголошення",
-        "nda": "Подпиши уебище",
         "wait_approval": "Дякуємо за реєстрацію! Адміністратор розглядає ваш запит. Будь ласка, зачекайте, ви отримаєте сповіщення найближчим часом.",
-        "filesent": "Файл успішно відправлен 🚀",
         "choose_lang": "Оберіть мову:",
         "choose_info": "Оберіть, що хочете змінити:",
         "edit_info": "✏️ Редагувати інформацію",
@@ -94,12 +107,29 @@ TEXTS = {
         "test_text_only": "Будь ласка, надішліть текстову відповідь.",
         "test_cancel_btn": "❌ Вийти з тесту",
         "test_cancelled_discarded": "Тест перервано.",
+        "meet_menu_title": "📅 З ким ви хочете провести мітинг?",
+        "meet_btn_manager": "👔 З менеджером",
+        "meet_btn_teamlead": "👑 З тимлідом",
+        "meet_btn_mentor": "🎓 Запросити ментора",
+        "meet_no_available": "❌ Зараз немає доступних користувачів.",
+        "meet_select_manager": "Оберіть менеджера:",
+        "meet_select_teamlead": "Оберіть тімліда:",
+        "meet_select_mentor": "🎓 Оберіть менеджера для запиту ментора:",
+        "meet_sent": "✅ Запит на зустріч надіслано!",
+        "meet_mentor_sent": "✅ Запит на ментора надіслано!",
+        "meet_error": "❌ Не вдалося надіслати запит. Спробуйте пізніше.",
+        "meet_incoming_11": "📅 <b>{name}</b> хоче провести зустріч 1:1 з вами.",
+        "meet_incoming_mentor": "🎓 <b>{name}</b> запросив ментора на 1 зміну.",
+        "meet_btn_confirm": "✅ Прийняти",
+        "meet_btn_decline": "❌ Відхилити",
+        "meet_confirmed_by": "✅ <b>{name}</b> прийняв ваш запит на зустріч 1:1!",
+        "meet_declined_by": "❌ <b>{name}</b> відхилив ваш запит на зустріч 1:1.",
+        "meet_you_confirmed": "✅ Ви прийняли запит на зустріч.",
+        "meet_you_declined": "❌ Ви відхилили запит на зустріч.",
+        "meet_back": "⬅️ Назад",
     },
     "en": {
-        "signNDA": "✍️ Sign a non-disclosure agreement",
-        "nda": "Подпиши уебище",
         "wait_approval": "Thanks for registering! An administrator is reviewing your request. Please hang tight, you’ll be notified soon.",
-        "filesent": "File sent successfully 🚀",
         "choose_lang": "Choose language:",
         "choose_info": "Select what you want to change:",
         "edit_info": "✏️ Edit Info",
@@ -139,6 +169,26 @@ TEXTS = {
         "test_text_only": "Please send a text answer.",
         "test_cancel_btn": "❌ Exit Test",
         "test_cancelled_discarded": "Test cancelled.",
+        "meet_menu_title": "📅 Who would you like to have a meeting with?",
+        "meet_btn_manager": "👔 With Manager",
+        "meet_btn_teamlead": "👑 With Teamlead",
+        "meet_btn_mentor": "🎓 Request Mentor",
+        "meet_no_available": "❌ No users available right now.",
+        "meet_select_manager": "Select a manager:",
+        "meet_select_teamlead": "Select a teamlead:",
+        "meet_select_mentor": "🎓 Select a manager for the mentor request:",
+        "meet_sent": "✅ Meeting request sent!",
+        "meet_mentor_sent": "✅ Mentor request sent!",
+        "meet_error": "❌ Could not send the request. Try again later.",
+        "meet_incoming_11": "📅 <b>{name}</b> wants to have a 1:1 meeting with you.",
+        "meet_incoming_mentor": "🎓 <b>{name}</b> has requested a mentor for 1 shift.",
+        "meet_btn_confirm": "✅ Confirm",
+        "meet_btn_decline": "❌ Decline",
+        "meet_confirmed_by": "✅ <b>{name}</b> confirmed your 1:1 meeting request!",
+        "meet_declined_by": "❌ <b>{name}</b> declined your 1:1 meeting request.",
+        "meet_you_confirmed": "✅ You confirmed the meeting request.",
+        "meet_you_declined": "❌ You declined the meeting request.",
+        "meet_back": "⬅️ Back",
     }
 }
 
@@ -425,6 +475,138 @@ MENU_BUTTONS = {
 
 def get_all_variants(btn_key: str):
     return [lang_dict[btn_key] for lang_dict in MENU_BUTTONS.values() if btn_key in lang_dict]
+
+NDA_INSTRUCTION = {
+    "ua": (
+        "✍️ <b>Інструкція: підписання договору про нерозголошення</b>\n\n"
+
+        "<b>📂 Крок 1 — Відкрийте документ для редагування</b>\n"
+        "Договір надається у форматі PDF. Для зручного заповнення даних конвертуйте його у Word:\n"
+        "🔗 https://www.ilovepdf.com/ru/pdf_to_word\n\n"
+
+        "<b>📋 Крок 2 — Заповніть свої дані у документі</b>\n\n"
+
+        "🔢 <b>ІПН (номер картки платника податків)</b>\n"
+        "Знайдіть: <code>1234567890</code>\n"
+        "Замініть на свій ІПН — <i>20 місць</i>\n\n"
+
+        "📅 <b>Дата підписання</b>\n"
+        "Знайдіть: <code>«01» червня 2025 р.</code>\n"
+        "Замініть на актуальну дату — <i>8 місць</i>\n\n"
+
+        "👤 <b>ПІБ (українською)</b>\n"
+        "Знайдіть: <code>ІВАНОВ ІВАН ІВАНОВИЧ</code>\n"
+        "Замініть на своє ПІБ — <i>6 місць</i>\n\n"
+
+        "🔤 <b>ПІБ (англійською)</b>\n"
+        "Знайдіть: <code>IVANOV IVAN</code>\n"
+        "Замініть на прізвище та ім'я латиницею — <i>6 місць</i>\n\n"
+
+        "🏠 <b>Адреса прописки (укр)</b>\n"
+        "Знайдіть: <code>Україна, 11111, Київ, вул. Хрещатик, буд. 1, кв. 1</code>\n"
+        "Замініть на свою повну адресу — <i>3 місця</i>\n\n"
+
+        "🌍 <b>Адреса прописки (англ)</b>\n"
+        "Знайдіть: <code>Ukraine, 11111, Kyiv, Khreshchatyk str., bldg. 1, apt. 1</code>\n"
+        "Замініть на свою адресу англійською — <i>3 місця</i>\n\n"
+
+        "<b>📄 Крок 3 — Конвертуйте назад у PDF</b>\n"
+        "Після заповнення збережіть документ та перетворіть його з Word у PDF:\n"
+        "🔗 https://www.ilovepdf.com/ru/word_to_pdf\n\n"
+
+        "<b>✍️ Крок 4 — Підпишіть PDF</b>\n"
+        "Поставте підпис у <b>6 місцях</b> — внизу кожного з трьох договорів під своїми даними:\n"
+        "🔗 https://www.ilovepdf.com/ru/sign-pdf\n\n"
+
+        "<b>📤 Крок 5 — Надішліть готовий PDF своєму менеджеру</b>"
+    ),
+    "ru": (
+        "✍️ <b>Инструкция: подписание договора о неразглашении</b>\n\n"
+
+        "<b>📂 Шаг 1 — Откройте документ для редактирования</b>\n"
+        "Договор предоставляется в формате PDF. Для удобного заполнения данных конвертируйте его в Word:\n"
+        "🔗 https://www.ilovepdf.com/ru/pdf_to_word\n\n"
+
+        "<b>📋 Шаг 2 — Заполните свои данные в документе</b>\n\n"
+
+        "🔢 <b>ИНН (номер карты налогоплательщика)</b>\n"
+        "Найдите: <code>1234567890</code>\n"
+        "Замените на свой ИНН — <i>20 мест</i>\n\n"
+
+        "📅 <b>Дата подписания</b>\n"
+        "Найдите: <code>«01» червня 2025 р.</code>\n"
+        "Замените на актуальную дату — <i>8 мест</i>\n\n"
+
+        "👤 <b>ФИО (украинскими буквами)</b>\n"
+        "Найдите: <code>ІВАНОВ ІВАН ІВАНОВИЧ</code>\n"
+        "Замените на своё ФИО — <i>6 мест</i>\n\n"
+
+        "🔤 <b>ФИО (английскими буквами)</b>\n"
+        "Найдите: <code>IVANOV IVAN</code>\n"
+        "Замените на фамилию и имя латиницей — <i>6 мест</i>\n\n"
+
+        "🏠 <b>Адрес прописки (укр)</b>\n"
+        "Найдите: <code>Україна, 11111, Київ, вул. Хрещатик, буд. 1, кв. 1</code>\n"
+        "Замените на свой полный адрес — <i>3 места</i>\n\n"
+
+        "🌍 <b>Адрес прописки (англ)</b>\n"
+        "Найдите: <code>Ukraine, 11111, Kyiv, Khreshchatyk str., bldg. 1, apt. 1</code>\n"
+        "Замените на адрес на английском — <i>3 места</i>\n\n"
+
+        "<b>📄 Шаг 3 — Конвертируйте обратно в PDF</b>\n"
+        "После заполнения сохраните документ и преобразуйте его из Word в PDF:\n"
+        "🔗 https://www.ilovepdf.com/ru/word_to_pdf\n\n"
+
+        "<b>✍️ Шаг 4 — Подпишите PDF</b>\n"
+        "Поставьте подпись в <b>6 местах</b> — внизу каждого из трёх договоров под своими данными:\n"
+        "🔗 https://www.ilovepdf.com/ru/sign-pdf\n\n"
+
+        "<b>📤 Шаг 5 — Отправьте готовый PDF своему менеджеру</b>"
+    ),
+    "en": (
+        "✍️ <b>Instructions: Signing the Non-Disclosure Agreement</b>\n\n"
+
+        "<b>📂 Step 1 — Open the document for editing</b>\n"
+        "The contract is provided in PDF format. To fill in your details more easily, convert it to Word first:\n"
+        "🔗 https://www.ilovepdf.com/ru/pdf_to_word\n\n"
+
+        "<b>📋 Step 2 — Fill in your details in the document</b>\n\n"
+
+        "🔢 <b>Tax ID number (IPN)</b>\n"
+        "Find: <code>1234567890</code>\n"
+        "Replace with your Tax ID — <i>20 places</i>\n\n"
+
+        "📅 <b>Signing date</b>\n"
+        "Find: <code>June 01, 2025</code>\n"
+        "Replace with the actual date — <i>8 places</i>\n\n"
+
+        "👤 <b>Full name (Ukrainian)</b>\n"
+        "Find: <code>ІВАНОВ ІВАН ІВАНОВИЧ</code>\n"
+        "Replace with your full name in Ukrainian — <i>6 places</i>\n\n"
+
+        "🔤 <b>Full name (English)</b>\n"
+        "Find: <code>IVANOV IVAN</code>\n"
+        "Replace with your surname and first name in Latin letters — <i>6 places</i>\n\n"
+
+        "🏠 <b>Registered address (Ukrainian)</b>\n"
+        "Find: <code>Україна, 11111, Київ, вул. Хрещатик, буд. 1, кв. 1</code>\n"
+        "Replace with your full address in Ukrainian — <i>3 places</i>\n\n"
+
+        "🌍 <b>Registered address (English)</b>\n"
+        "Find: <code>Ukraine, 11111, Kyiv, Khreshchatyk str., bldg. 1, apt. 1</code>\n"
+        "Replace with your address in English — <i>3 places</i>\n\n"
+
+        "<b>📄 Step 3 — Convert back to PDF</b>\n"
+        "After filling in your details, save the document and convert it from Word back to PDF:\n"
+        "🔗 https://www.ilovepdf.com/ru/word_to_pdf\n\n"
+
+        "<b>✍️ Step 4 — Sign the PDF</b>\n"
+        "Place your signature in <b>6 spots</b> — at the bottom of each of the three contracts under your details:\n"
+        "🔗 https://www.ilovepdf.com/ru/sign-pdf\n\n"
+
+        "<b>📤 Step 5 — Send the signed PDF to your manager</b>"
+    ),
+}
 
 PROFILE_BTNS = get_all_variants("btn_profile")
 FAQ_BTNS = get_all_variants("btn_faq")

@@ -1,5 +1,6 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
+from google.cloud.firestore_v1.base_query import FieldFilter
 from datetime import datetime
 
 import os
@@ -37,14 +38,15 @@ def add_user(user_id: int, full_name: str, birthdate: str, language: str = "en")
         "birthdate": birthdate,
         "language": language,
         "created_at": created_at,
-        "is_approved": False  
+        "is_approved": False,
+        "role": "support",
     })
 
 def approve_user(user_id: int):
     users_collection.document(str(user_id)).update({"is_approved": True})
 
 def get_pending_users():
-    docs = users_collection.where("is_approved", "==", False).stream()
+    docs = users_collection.where(filter=FieldFilter("is_approved", "==", False)).stream()
     return [doc.to_dict() for doc in docs]
 
 def get_user(user_id: int):
@@ -76,8 +78,21 @@ def delete_user(user_id: int):
     users_collection.document(str(user_id)).delete()
 
 def get_all_approved_users():
-    docs = users_collection.where("is_approved", "==", True).stream()
+    docs = users_collection.where(filter=FieldFilter("is_approved", "==", True)).stream()
     return [doc.to_dict() for doc in docs]
 
 def update_onboarding_stage(user_id: int, stage: int):
     users_collection.document(str(user_id)).update({"onboarding_stage": stage})
+
+def set_role(user_id: int, role: str):
+    users_collection.document(str(user_id)).update({"role": role})
+
+def approve_user_with_role(user_id: int, role: str):
+    users_collection.document(str(user_id)).update({"is_approved": True, "role": role})
+
+def get_users_by_role(role: str):
+    docs = (users_collection
+            .where(filter=FieldFilter("is_approved", "==", True))
+            .where(filter=FieldFilter("role", "==", role))
+            .stream())
+    return [doc.to_dict() for doc in docs]
