@@ -70,7 +70,7 @@ async def holiday_checker(bot):
                 if today.day == 1 and today.month == 1:
                     await bot.send_message(user_id, TEXTS[lang]["new_year"])
 
-                if today.day == 7 and today.month == 1:
+                if today.day == 25 and today.month == 12:
                     await bot.send_message(user_id, TEXTS[lang]["christmas"])
 
                 if today.day == 24 and today.month == 8:

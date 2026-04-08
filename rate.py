@@ -1,7 +1,11 @@
+import asyncio
+import logging
 import os
 from datetime import datetime
 import gspread
 from aiogram import Router, F
+
+logger = logging.getLogger(__name__)
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
@@ -40,7 +44,7 @@ def append_feedback_to_sheet(row):
 
         values = worksheet.get_all_values()
         if not values or all(cell == "" for cell in values[0]):
-            headers = ["Time", "User ID", "Name", "Type", "Stars", "Message"]
+            headers = ["Timestamp", "User ID", "Name", "Type", "Stars", "Message"]
             worksheet.append_row(headers)
 
             col_widths = [150, 130, 250, 100, 100, 450]
@@ -81,10 +85,15 @@ def append_feedback_to_sheet(row):
             })
             worksheet.format("F2:F1000", {"wrapStrategy": "WRAP"})
 
-        worksheet.append_row(row)
+        all_values = worksheet.get_all_values()
+        next_row = next(
+            (i for i, r in enumerate(all_values, start=1) if all(c == "" for c in r)),
+            len(all_values) + 1
+        )
+        worksheet.update(f"A{next_row}", [row])
 
     except Exception as e:
-        print(f"Excel Error: {e}")
+        logger.error("Ошибка записи в Sheets (Feedback): %s", e, exc_info=True)
 
 
 def get_feedback_type_kb(lang: str):
@@ -192,7 +201,7 @@ async def process_feedback_text(message: Message, state: FSMContext, user: dict)
         message.text
     ]
 
-    append_feedback_to_sheet(row)
+    await asyncio.to_thread(append_feedback_to_sheet, row)
 
     is_admin = message.from_user.id in ADMIN_IDS
     await state.clear()

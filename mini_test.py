@@ -1,7 +1,11 @@
+import asyncio
+import logging
 import os
 from datetime import datetime
 import gspread
 from aiogram import Router, F
+
+logger = logging.getLogger(__name__)
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
@@ -119,11 +123,16 @@ def append_test_to_sheet(row: list, headers: list):
             worksheet.spreadsheet.batch_update({"requests": batch_requests})
             worksheet.format("A1:Z1", {"textFormat": {"bold": True}, "horizontalAlignment": "CENTER"})
 
-        worksheet.append_row(row)
+        all_data = worksheet.get_all_values()
+        next_row = next(
+            (i for i, r in enumerate(all_data, start=1) if all(c == "" for c in r)),
+            len(all_data) + 1
+        )
+        worksheet.update(f"A{next_row}", [row])
         worksheet.format("A2:Z1000", {"wrapStrategy": "WRAP", "verticalAlignment": "TOP"})
 
     except Exception as e:
-        print(f"Test Excel Error: {e}")
+        logger.error("Ошибка записи в Sheets (Test Results): %s", e, exc_info=True)
 
 
 @router.message(F.text.in_(TEST_BTNS))
@@ -183,14 +192,14 @@ async def handle_test_answer(message: Message, state: FSMContext, user: dict):
         end_time = datetime.now()
         start_time = datetime.fromisoformat(data.get("start_time"))
 
-        headers = ["Time", "User ID", "Name"] + [f"Q{i + 1}" for i in range(TOTAL_QUESTIONS)]
+        headers = ["Timestamp", "User ID", "Name"] + [f"Q{i + 1}" for i in range(TOTAL_QUESTIONS)]
         row = [
             build_time_cell(start_time, end_time),
             str(message.from_user.id),
             user.get("full_name", "Unknown"),
         ] + answers
 
-        append_test_to_sheet(row, headers)
+        await asyncio.to_thread(append_test_to_sheet, row, headers)
 
         await state.clear()
         await message.answer(

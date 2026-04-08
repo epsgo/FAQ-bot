@@ -130,7 +130,7 @@ async def process_delete_user(callback: CallbackQuery):
     try:
         await callback.bot.send_message(
             chat_id=user_id,
-            text="Your account was deleted.",
+            text="...",
             reply_markup=get_start_kb()
         )
     except Exception as e:

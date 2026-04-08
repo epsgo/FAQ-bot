@@ -4,7 +4,6 @@ load_dotenv()
 admin_raw = os.getenv("ADMIN_IDS", "")
 ADMIN_IDS = {int(i.strip()) for i in admin_raw.split(",") if i.strip()}
 DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK")
-# ФАЙЛ ХУЙНИ
 TEXTS = {
     "ru": {
         "signNDA": "✍️ Подписать контракт о неразглашении",
@@ -254,6 +253,147 @@ TEST_QUESTIONS = [
         "ua": "Що таке Recap (recap hours)? Поясніть, як водій може використовувати це правило у своїй роботі.",
         "en": "What is Recap (recap hours)? Explain how a driver can use this rule in their work.",
     },
+]
+
+
+ONBOARDING_STAGES = {
+    1: {"day": 3,  "questions": [
+        {"key": "q1", "type": "score"},
+        {"key": "q2", "type": "score"},
+        {"key": "q3", "type": "score"},
+    ]},
+    2: {"day": 7,  "questions": [
+        {"key": "q4", "type": "score"},
+        {"key": "q5", "type": "score"},
+        {"key": "q6", "type": "text"},
+    ]},
+    3: {"day": 14, "questions": [
+        {"key": "q7",  "type": "text"},
+        {"key": "q8",  "type": "score"},
+        {"key": "q9",  "type": "score"},
+    ]},
+    4: {"day": 30, "questions": [
+        {"key": "q10", "type": "text"},
+        {"key": "q11", "type": "yn"},
+        {"key": "q12", "type": "text"},
+    ]},
+}
+
+ONBOARDING_QUESTIONS = {
+    "q1": {
+        "ru": "Насколько ты почувствовал себя welcome / частью команды? (оцени от 1 до 5)",
+        "ua": "Наскільки ти відчув себе welcome / частиною команди? (оціни від 1 до 5)",
+        "en": "How welcomed / part of the team did you feel? (rate 1 to 5)",
+    },
+    "q2": {
+        "ru": "Получил ли ты всё необходимое (доступы, информацию) вовремя? (оцени от 1 до 5)",
+        "ua": "Чи отримав ти все необхідне (доступи, інформацію) вчасно? (оціни від 1 до 5)",
+        "en": "Did you receive everything you needed (access, information) on time? (rate 1 to 5)",
+    },
+    "q3": {
+        "ru": "Насколько понятно, какие от тебя ожидания в первые 1–3 месяца? (оцени от 1 до 5)",
+        "ua": "Наскільки зрозуміло, які від тебе очікування в перші 1–3 місяці? (оціни від 1 до 5)",
+        "en": "How clear are the expectations from you in the first 1–3 months? (rate 1 to 5)",
+    },
+    "q4": {
+        "ru": "Насколько комфортно / безопасно задавать вопросы / просить помощи? (оцени от 1 до 5)",
+        "ua": "Наскільки комфортно / безпечно ставити запитання / просити допомоги? (оціни від 1 до 5)",
+        "en": "How comfortable / safe do you feel asking questions or asking for help? (rate 1 to 5)",
+    },
+    "q5": {
+        "ru": "Соответствует ли реальная работа тому, о чём рассказывали на собеседовании? (оцени от 1 до 5)",
+        "ua": "Чи відповідає реальна робота тому, про що розповідали на співбесіді? (оціни від 1 до 5)",
+        "en": "Does the actual work match what was described during the interview? (rate 1 to 5)",
+    },
+    "q6": {
+        "ru": "Что было самым полезным / приятным в онбординге?",
+        "ua": "Що було найкориснішим / найприємнішим в онбордингу?",
+        "en": "What was the most useful / pleasant part of the onboarding?",
+    },
+    "q7": {
+        "ru": "Чего не хватило / что можно было бы сделать лучше?",
+        "ua": "Чого не вистачило / що можна було б зробити краще?",
+        "en": "What was missing / what could have been done better?",
+    },
+    "q8": {
+        "ru": "Насколько ты сейчас уверен в том, что можешь успешно выполнять свою работу? (оцени от 1 до 5)",
+        "ua": "Наскільки ти зараз впевнений у тому, що можеш успішно виконувати свою роботу? (оціни від 1 до 5)",
+        "en": "How confident are you now that you can successfully perform your job? (rate 1 to 5)",
+    },
+    "q9": {
+        "ru": "Рекомендовал бы ты приходить к нам работать друзьям? (оцени от 1 до 5)",
+        "ua": "Чи рекомендував би ти приходити до нас працювати друзям? (оціни від 1 до 5)",
+        "en": "Would you recommend working here to your friends? (rate 1 to 5)",
+    },
+    "q10": {
+        "ru": "Как ты чувствуешь себя в команде сейчас? Насколько, по твоим ощущениям, тебе удалось интегрироваться?",
+        "ua": "Як ти почуваєшся в команді зараз? Наскільки, за твоїми відчуттями, тобі вдалося інтегруватися?",
+        "en": "How do you feel in the team now? How well do you feel you've integrated?",
+    },
+    "q11": {
+        "ru": "Есть ли что-то, о чём ты стесняешься / боишься спросить у менеджера / коллег?",
+        "ua": "Чи є щось, про що ти соромишся / боїшся запитати у менеджера / колег?",
+        "en": "Is there anything you are hesitant / afraid to ask your manager or colleagues?",
+    },
+    "q12": {
+        "ru": "Что тебе больше всего нравится в работе за этот первый месяц? А что оказалось сложнее / неожиданнее, чем ты думал?",
+        "ua": "Що тобі найбільше подобається в роботі за цей перший місяць? А що виявилося складнішим / несподіванішим, ніж ти думав?",
+        "en": "What do you like most about the work in this first month? What turned out to be harder / more unexpected than you thought?",
+    },
+}
+
+ONBOARDING_TEXTS = {
+    "ru": {
+        "intro_day3":   "👋 Прошло 3 дня с момента твоего старта! Хотим узнать, как ты себя чувствуешь. Ответь, пожалуйста, на несколько коротких вопросов.",
+        "intro_day7":   "📅 Прошла неделя! Несколько вопросов к тебе — это займёт пару минут.",
+        "intro_day14":  "🗓 Две недели позади! Поделись впечатлениями — нам важна твоя обратная связь.",
+        "intro_day30":  "🎉 Первый месяц позади! Несколько финальных вопросов — как ты себя чувствуешь в команде?",
+        "thanks":       "✅ Спасибо за ответы! Твоя обратная связь очень важна для нас.",
+        "yn_yes":       "✅ Да",
+        "yn_no":        "❌ Нет",
+        "yn_followup":  "Расскажи подробнее — что именно ты боишься спросить?",
+        "alert_score":  "⚠️ Низкая оценка от сотрудника\n\n👤 {name} (ID: {user_id})\n📋 Вопрос: {question}\n⭐ Оценка: {answer}/5",
+        "alert_text":   "⚠️ Тревожный ответ от сотрудника\n\n👤 {name} (ID: {user_id})\n📋 Вопрос: {question}\n💬 Ответ: {answer}",
+        "alert_yn":     "⚠️ Сотрудник боится задавать вопросы\n\n👤 {name} (ID: {user_id})\n💬 Подробности: {answer}",
+    },
+    "ua": {
+        "intro_day3":   "👋 Минуло 3 дні з моменту твого старту! Хочемо дізнатися, як ти себе почуваєш. Будь ласка, дай відповіді на кілька коротких запитань.",
+        "intro_day7":   "📅 Минув тиждень! Кілька запитань до тебе — це займе пару хвилин.",
+        "intro_day14":  "🗓 Два тижні позаду! Поділися враженнями — нам важливий твій зворотний зв'язок.",
+        "intro_day30":  "🎉 Перший місяць позаду! Кілька фінальних запитань — як ти почуваєшся в команді?",
+        "thanks":       "✅ Дякуємо за відповіді! Твій зворотний зв'язок дуже важливий для нас.",
+        "yn_yes":       "✅ Так",
+        "yn_no":        "❌ Ні",
+        "yn_followup":  "Розкажи детальніше — що саме ти боїшся запитати?",
+        "alert_score":  "⚠️ Низька оцінка від співробітника\n\n👤 {name} (ID: {user_id})\n📋 Питання: {question}\n⭐ Оцінка: {answer}/5",
+        "alert_text":   "⚠️ Тривожна відповідь від співробітника\n\n👤 {name} (ID: {user_id})\n📋 Питання: {question}\n💬 Відповідь: {answer}",
+        "alert_yn":     "⚠️ Співробітник боїться ставити запитання\n\n👤 {name} (ID: {user_id})\n💬 Подробиці: {answer}",
+    },
+    "en": {
+        "intro_day3":   "👋 3 days have passed since you started! We'd love to know how you're feeling. Please answer a few short questions.",
+        "intro_day7":   "📅 One week in! A few questions about your onboarding — it'll only take a couple of minutes.",
+        "intro_day14":  "🗓 Two weeks done! Share your impressions — your feedback matters to us.",
+        "intro_day30":  "🎉 First month complete! A few final questions — how are you feeling in the team?",
+        "thanks":       "✅ Thank you for your answers! Your feedback is very important to us.",
+        "yn_yes":       "✅ Yes",
+        "yn_no":        "❌ No",
+        "yn_followup":  "Tell us more — what exactly are you afraid to ask?",
+        "alert_score":  "⚠️ Low rating from employee\n\n👤 {name} (ID: {user_id})\n📋 Question: {question}\n⭐ Score: {answer}/5",
+        "alert_text":   "⚠️ Concerning response from employee\n\n👤 {name} (ID: {user_id})\n📋 Question: {question}\n💬 Answer: {answer}",
+        "alert_yn":     "⚠️ Employee is afraid to ask questions\n\n👤 {name} (ID: {user_id})\n💬 Details: {answer}",
+    },
+}
+
+ONBOARDING_NEGATIVE_KEYWORDS = [
+    "плохо", "ужасно", "не нравится", "разочарован", "разочарована", "не устраивает",
+    "стресс", "тяжело", "уволиться", "уйти", "не хочу", "не понимаю", "сложно",
+    "проблема", "проблемы", "некомфортно", "не ожидал", "не ожидала", "обманули",
+    "погано", "жахливо", "не подобається", "розчарований", "розчарована",
+    "не влаштовує", "стрес", "важко", "звільнитись", "піти", "не хочу",
+    "не розумію", "складно", "проблема", "проблеми", "некомфортно", "обманули",
+    "bad", "terrible", "don't like", "disappointed", "unsatisfied",
+    "stress", "hard", "quit", "leave", "don't want", "don't understand",
+    "difficult", "problem", "uncomfortable", "misled", "lied",
 ]
 
 MENU_BUTTONS = {

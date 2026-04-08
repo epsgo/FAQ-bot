@@ -18,6 +18,7 @@ class RegistrationState(StatesGroup):
 
 
 @router.message(CommandStart())
+@router.message(F.text == "Start Registration")
 async def start(message: Message, state: FSMContext):
     user = get_user(message.from_user.id)
 

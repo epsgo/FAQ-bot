@@ -74,3 +74,10 @@ def all_users():
 
 def delete_user(user_id: int):
     users_collection.document(str(user_id)).delete()
+
+def get_all_approved_users():
+    docs = users_collection.where("is_approved", "==", True).stream()
+    return [doc.to_dict() for doc in docs]
+
+def update_onboarding_stage(user_id: int, stage: int):
+    users_collection.document(str(user_id)).update({"onboarding_stage": stage})
