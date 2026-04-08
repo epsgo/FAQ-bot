@@ -7,8 +7,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 
 from db import get_user
-from keyboards import auth_required
-from const import MENU_BUTTONS, TEXTS
+from keyboards import auth_required, get_main_menu
+from const import MENU_BUTTONS, TEXTS, ADMIN_IDS
 
 router = Router()
 
@@ -194,5 +194,9 @@ async def process_feedback_text(message: Message, state: FSMContext, user: dict)
 
     append_feedback_to_sheet(row)
 
+    is_admin = message.from_user.id in ADMIN_IDS
     await state.clear()
-    await message.answer(TEXTS[lang]["rate_thanks"])
+    await message.answer(
+        TEXTS[lang]["rate_thanks"],
+        reply_markup=get_main_menu(lang, is_admin=is_admin)
+    )

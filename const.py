@@ -45,6 +45,11 @@ TEXTS = {
         "rate_ask_bad": "Что можно улучшить?",
         "rate_text_only": "Пожалуйста, отправьте текстовое сообщение.",
         "rate_thanks": "Спасибо! Ваш отзыв отправлен 🚀",
+        "test_start": "📝 Тест начинается! Ответьте на каждый вопрос текстом. Всего 22 вопроса.",
+        "test_thanks": "✅ Тест завершён! Спасибо за ваши ответы. Результаты сохранены.",
+        "test_text_only": "Пожалуйста, отправьте текстовый ответ.",
+        "test_cancel_btn": "❌ Выйти с теста",
+        "test_cancelled_discarded": "Тест прерван.",
     },
     "ua": {
         "signNDA": "✍️ Підписати контракт про нерозголошення",
@@ -85,6 +90,11 @@ TEXTS = {
         "rate_ask_bad": "Що можна покращити?",
         "rate_text_only": "Будь ласка, надішліть текстове повідомлення.",
         "rate_thanks": "Дякуємо! Ваш відгук надіслано 🚀",
+        "test_start": "📝 Тест починається! Відповідайте на кожне питання текстом. Всього 22 питання.",
+        "test_thanks": "✅ Тест завершено! Дякуємо за ваші відповіді. Результати збережено.",
+        "test_text_only": "Будь ласка, надішліть текстову відповідь.",
+        "test_cancel_btn": "❌ Вийти з тесту",
+        "test_cancelled_discarded": "Тест перервано.",
     },
     "en": {
         "signNDA": "✍️ Sign a non-disclosure agreement",
@@ -125,8 +135,126 @@ TEXTS = {
         "rate_ask_bad": "What can be improved?",
         "rate_text_only": "Please send a text message.",
         "rate_thanks": "Thank you! Your feedback has been sent 🚀",
+        "test_start": "📝 The test is starting! Answer each question with text. 22 questions total.",
+        "test_thanks": "✅ Test completed! Thank you for your answers. Results have been saved.",
+        "test_text_only": "Please send a text answer.",
+        "test_cancel_btn": "❌ Exit Test",
+        "test_cancelled_discarded": "Test cancelled.",
     }
 }
+
+TEST_QUESTIONS = [
+    {
+        "ru": "Что такое Unidentified Driving Events? Опишите, как они появляются в логбуке водителя и какой порядок действий необходимо выполнить для их обработки.",
+        "ua": "Що таке Unidentified Driving Events? Опишіть, як вони з'являються у логбуку водія та який порядок дій необхідно виконати для їх обробки.",
+        "en": "What are Unidentified Driving Events? Describe how they appear in a driver's logbook and what steps must be taken to handle them.",
+    },
+    {
+        "ru": "Сертификация логбука. Почему водитель обязан сертифицировать свой логбук?",
+        "ua": "Сертифікація логбуку. Чому водій зобов'язаний сертифікувати свій логбук?",
+        "en": "Logbook certification. Why is a driver required to certify their logbook?",
+    },
+    {
+        "ru": "Что такое Bill of Lading (BOL)? Опишите его назначение и какую информацию он обычно содержит.",
+        "ua": "Що таке Bill of Lading (BOL)? Опишіть його призначення та яку інформацію він зазвичай містить.",
+        "en": "What is a Bill of Lading (BOL)? Describe its purpose and what information it typically contains.",
+    },
+    {
+        "ru": "Как водителю выполнить полное переподключение к грузовику (ELD устройству)? Опишите пошаговый процесс.",
+        "ua": "Як водієві виконати повне перепідключення до вантажівки (ELD пристрою)? Опишіть покроковий процес.",
+        "en": "How does a driver perform a full reconnection to the truck (ELD device)? Describe the step-by-step process.",
+    },
+    {
+        "ru": "Кто такой ко-драйвер (co-driver)? Опишите его роль и объясните, как добавить ко-драйвера в приложении.",
+        "ua": "Хто такий ко-драйвер (co-driver)? Опишіть його роль та поясніть, як додати ко-драйвера у додатку.",
+        "en": "Who is a co-driver? Describe their role and explain how to add a co-driver in the app.",
+    },
+    {
+        "ru": "Опишите полный процесс подключения водителя к грузовику через ELD-систему. Укажите все необходимые шаги и проверки.",
+        "ua": "Опишіть повний процес підключення водія до вантажівки через ELD-систему. Вкажіть усі необхідні кроки та перевірки.",
+        "en": "Describe the full process of connecting a driver to a truck through the ELD system. Specify all necessary steps and checks.",
+    },
+    {
+        "ru": "Как водитель может отправить свои данные в FMCSA через приложение? Опишите доступные способы и последовательность действий.",
+        "ua": "Як водій може надіслати свої дані до FMCSA через додаток? Опишіть доступні способи та послідовність дій.",
+        "en": "How can a driver send their data to FMCSA through the app? Describe the available methods and the sequence of actions.",
+    },
+    {
+        "ru": "Опишите три способа, с помощью которых водитель может сертифицировать свои логи в приложении.",
+        "ua": "Опишіть три способи, за допомогою яких водій може сертифікувати свої логи у додатку.",
+        "en": "Describe the three ways a driver can certify their logs in the app.",
+    },
+    {
+        "ru": "Кто такие Shipper и Receiver? Объясните их роли в процессе перевозки.",
+        "ua": "Хто такі Shipper та Receiver? Поясніть їхні ролі у процесі перевезення.",
+        "en": "Who are the Shipper and Receiver? Explain their roles in the transportation process.",
+    },
+    {
+        "ru": "Что такое ELD (Electronic Logging Device)? Опишите его назначение и основные функции.",
+        "ua": "Що таке ELD (Electronic Logging Device)? Опишіть його призначення та основні функції.",
+        "en": "What is an ELD (Electronic Logging Device)? Describe its purpose and main functions.",
+    },
+    {
+        "ru": "Какие часовые пояса используются на территории США? Перечислите основные.",
+        "ua": "Які часові пояси використовуються на території США? Перелічіть основні.",
+        "en": "What time zones are used in the United States? List the main ones.",
+    },
+    {
+        "ru": "Что такое IFTA (International Fuel Tax Agreement)? Объясните его назначение и как он используется.",
+        "ua": "Що таке IFTA (International Fuel Tax Agreement)? Поясніть його призначення та як він використовується.",
+        "en": "What is IFTA (International Fuel Tax Agreement)? Explain its purpose and how it is used.",
+    },
+    {
+        "ru": "Как водитель может создать событие (event) в приложении? Опишите процесс.",
+        "ua": "Як водій може створити подію (event) у додатку? Опишіть процес.",
+        "en": "How can a driver create an event in the app? Describe the process.",
+    },
+    {
+        "ru": "Что такое HOS? Объясните основные правила и ограничения.",
+        "ua": "Що таке HOS? Поясніть основні правила та обмеження.",
+        "en": "What is HOS? Explain the main rules and limitations.",
+    },
+    {
+        "ru": "Опишите основные типы нарушений HOS. Приведите примеры.",
+        "ua": "Опишіть основні типи порушень HOS. Наведіть приклади.",
+        "en": "Describe the main types of HOS violations. Provide examples.",
+    },
+    {
+        "ru": "Что такое DOT-инспекция и как она проходит? Опишите процесс и что проверяется.",
+        "ua": "Що таке DOT-інспекція та як вона проходить? Опишіть процес і що перевіряється.",
+        "en": "What is a DOT inspection and how does it proceed? Describe the process and what is checked.",
+    },
+    {
+        "ru": "Что такое правило Split Sleeper Berth? Объясните его логику и как водитель может его использовать.",
+        "ua": "Що таке правило Split Sleeper Berth? Поясніть його логіку та як водій може ним користуватися.",
+        "en": "What is the Split Sleeper Berth rule? Explain its logic and how a driver can use it.",
+    },
+    {
+        "ru": "Что такое Intermediate Logs? Объясните, когда и зачем они создаются.",
+        "ua": "Що таке Intermediate Logs? Поясніть, коли та навіщо вони створюються.",
+        "en": "What are Intermediate Logs? Explain when and why they are created.",
+    },
+    {
+        "ru": "Как создать профиль водителя в системе? Опишите основные шаги.",
+        "ua": "Як створити профіль водія у системі? Опишіть основні кроки.",
+        "en": "How do you create a driver profile in the system? Describe the main steps.",
+    },
+    {
+        "ru": "Как создать профиль грузовика (vehicle) в системе? Опишите процесс.",
+        "ua": "Як створити профіль вантажівки (vehicle) у системі? Опишіть процес.",
+        "en": "How do you create a truck (vehicle) profile in the system? Describe the process.",
+    },
+    {
+        "ru": "Кто такие car haulers? Опишите особенности их работы.",
+        "ua": "Хто такі car haulers? Опишіть особливості їхньої роботи.",
+        "en": "Who are car haulers? Describe the specifics of their work.",
+    },
+    {
+        "ru": "Что такое Recap (recap hours)? Объясните, как водитель может использовать это правило в своей работе.",
+        "ua": "Що таке Recap (recap hours)? Поясніть, як водій може використовувати це правило у своїй роботі.",
+        "en": "What is Recap (recap hours)? Explain how a driver can use this rule in their work.",
+    },
+]
 
 MENU_BUTTONS = {
     "ru": {

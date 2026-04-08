@@ -19,7 +19,7 @@ async def admin_only(handler, callback: CallbackQuery, data: dict):
 def get_admin_main_kb():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📋 All Users", callback_data="admin_all_users")],
-        [InlineKeyboardButton(text="⏳ Pending Requests", callback_data="admin_pending")]
+        [InlineKeyboardButton(text="⏳ Awaiting approval", callback_data="admin_pending")]
     ])
 
 @router.message(F.text.in_(ADMIN_BTNS))
