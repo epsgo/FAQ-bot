@@ -28,8 +28,6 @@ def _back_kb(lang: str):
     ])
 
 
-# ─── Main menu ────────────────────────────────────────────────────────────────
-
 @router.message(F.text.in_(MEETING_BTNS))
 @auth_required
 async def show_meeting_menu(message: Message, user: dict):
@@ -44,8 +42,6 @@ async def meet_back(callback: CallbackQuery):
     await callback.message.edit_text(t(lang, "meet_menu_title"), reply_markup=_meeting_main_kb(lang))
     await callback.answer()
 
-
-# ─── 1:1 — select person ─────────────────────────────────────────────────────
 
 @router.callback_query(F.data.startswith("meet_role_"))
 async def show_role_users(callback: CallbackQuery):
@@ -77,8 +73,6 @@ async def show_role_users(callback: CallbackQuery):
     )
     await callback.answer()
 
-
-# ─── 1:1 — send request ───────────────────────────────────────────────────────
 
 @router.callback_query(F.data.startswith("meet_user_"))
 async def request_meeting(callback: CallbackQuery):
@@ -113,8 +107,6 @@ async def request_meeting(callback: CallbackQuery):
     await callback.message.edit_text(t(req_lang, "meet_sent"))
     await callback.answer()
 
-
-# ─── 1:1 — confirm / decline ─────────────────────────────────────────────────
 
 @router.callback_query(F.data.startswith("meet_confirm_"))
 async def confirm_meeting(callback: CallbackQuery):
@@ -157,8 +149,6 @@ async def decline_meeting(callback: CallbackQuery):
     await callback.message.edit_text(t(dcl_lang, "meet_you_declined"))
     await callback.answer()
 
-
-# ─── Mentor request ───────────────────────────────────────────────────────────
 
 @router.callback_query(F.data == "meet_mentor")
 async def request_mentor(callback: CallbackQuery):

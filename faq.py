@@ -10,7 +10,6 @@ from keyboards import auth_required
 router = Router()
 
 FAQ_DELETE_DELAY = 12 * 60 * 60
-# (chat_id, text_msg_id) -> [photo_msg_id, ...]  — для удаления фото при нажатии Back
 _pending_photo_deletions: dict[tuple, list[int]] = {}
 
 with open("faq_data.json", encoding="utf-8") as f:
@@ -82,7 +81,6 @@ async def show_category(callback: CallbackQuery):
     cat = FAQ_DATA[cat_idx]
     title = f"{cat['icon']} {cat['titles'][lang]}"
 
-    # Удалить фото-сообщения, если они были отправлены отдельно от текста
     key = (callback.message.chat.id, callback.message.message_id)
     for photo_id in _pending_photo_deletions.pop(key, []):
         try:
@@ -134,7 +132,6 @@ async def show_answer(callback: CallbackQuery):
 
             if len(existing_images) == 1:
                 if len(full_text) <= 1024:
-                    # Одно сообщение: фото + подпись + кнопка
                     sent = await callback.message.answer_photo(
                         photo=FSInputFile(existing_images[0]),
                         caption=full_text,
@@ -143,21 +140,18 @@ async def show_answer(callback: CallbackQuery):
                     )
                     schedule_delete(sent)
                 else:
-                    # Фото отдельно, длинный текст отдельно
                     sent_photo = await callback.message.answer_photo(photo=FSInputFile(existing_images[0]))
                     schedule_delete(sent_photo)
                     sent_text = await callback.message.answer(full_text[:4096], reply_markup=back_kb, parse_mode="HTML")
                     schedule_delete(sent_text)
                     _pending_photo_deletions[(callback.message.chat.id, sent_text.message_id)] = [sent_photo.message_id]
             else:
-                # Несколько фото — отправить как медиагруппу
                 media = [InputMediaPhoto(media=FSInputFile(p)) for p in existing_images]
                 sent_messages = await callback.message.answer_media_group(media=media)
                 for sent in sent_messages:
                     schedule_delete(sent)
                 photo_ids = [s.message_id for s in sent_messages]
 
-                # Текст + кнопка отдельным сообщением
                 if len(full_text) > 4096:
                     chunks = []
                     current_chunk = f"<b>{q['q'][lang]}</b>\n\n"

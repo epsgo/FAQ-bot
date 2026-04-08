@@ -71,7 +71,6 @@ def user_card_kb(user_id: int, back_role: str) -> InlineKeyboardMarkup:
     ])
 
 
-# ─── Admin main ────────────────────────────────────────────────────────────────
 
 @router.message(F.text.in_(ADMIN_BTNS))
 async def show_admin_panel(message: Message):
@@ -86,7 +85,6 @@ async def back_to_admin(callback: CallbackQuery):
     await callback.answer()
 
 
-# ─── All Users → role tabs ─────────────────────────────────────────────────────
 
 @router.callback_query(F.data == "admin_all_users")
 async def show_all_users(callback: types.CallbackQuery):
@@ -125,8 +123,6 @@ async def show_users_by_role(callback: CallbackQuery):
     await callback.answer()
 
 
-# ─── View user ─────────────────────────────────────────────────────────────────
-
 @router.callback_query(F.data.startswith("view_user_"))
 async def view_user(callback: CallbackQuery):
     parts = callback.data.split("_")
@@ -140,8 +136,6 @@ async def view_user(callback: CallbackQuery):
     )
     await callback.answer()
 
-
-# ─── Change Role ──────────────────────────────────────────────────────────────
 
 @router.callback_query(F.data.startswith("change_role_"))
 async def change_role(callback: CallbackQuery):
@@ -176,8 +170,6 @@ async def set_role_handler(callback: CallbackQuery):
         parse_mode="HTML"
     )
 
-
-# ─── Delete user ───────────────────────────────────────────────────────────────
 
 @router.callback_query(F.data.startswith("confirm_delete_"))
 async def confirm_delete(callback: CallbackQuery):
@@ -246,8 +238,6 @@ async def _refresh_role_list(callback: CallbackQuery, role: str):
     )
 
 
-# ─── Pending / Approve ────────────────────────────────────────────────────────
-
 @router.callback_query(F.data == "admin_pending")
 async def show_pending(callback: CallbackQuery):
     users = get_pending_users()
@@ -298,7 +288,6 @@ async def view_pending_user(callback: CallbackQuery):
 @router.callback_query(F.data.startswith("approve_with_role_"))
 async def process_approve_with_role(callback: CallbackQuery):
     parts   = callback.data.split("_")
-    # approve_with_role_{user_id}_{role}
     user_id = int(parts[3])
     role    = parts[4]
 
