@@ -65,6 +65,7 @@ TEXTS = {
         "meet_you_confirmed": "✅ Вы приняли запрос на встречу.",
         "meet_you_declined": "❌ Вы отклонили запрос на встречу.",
         "meet_back": "⬅️ Назад",
+        "goodbye": "Хорошего дня! 😊",
     },
     "ua": {
         "wait_approval": "Дякуємо за реєстрацію! Адміністратор розглядає ваш запит. Будь ласка, зачекайте, ви отримаєте сповіщення найближчим часом.",
@@ -127,6 +128,7 @@ TEXTS = {
         "meet_you_confirmed": "✅ Ви прийняли запит на зустріч.",
         "meet_you_declined": "❌ Ви відхилили запит на зустріч.",
         "meet_back": "⬅️ Назад",
+        "goodbye": "Гарного дня! 😊",
     },
     "en": {
         "wait_approval": "Thanks for registering! An administrator is reviewing your request. Please hang tight, you’ll be notified soon.",
@@ -189,6 +191,7 @@ TEXTS = {
         "meet_you_confirmed": "✅ You confirmed the meeting request.",
         "meet_you_declined": "❌ You declined the meeting request.",
         "meet_back": "⬅️ Back",
+        "goodbye": "Have a nice day! 😊",
     }
 }
 

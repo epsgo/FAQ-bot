@@ -196,9 +196,15 @@ async def process_delete_user(callback: CallbackQuery):
     user_id = int(parts[2])
     source  = parts[3]
     user    = get_user(user_id)
+    
+    user_lang = user.get("language", "en") if user else "en"
 
     try:
-        await callback.bot.send_message(chat_id=user_id, text="...", reply_markup=get_start_kb())
+        await callback.bot.send_message(
+            chat_id=user_id, 
+            text=TEXTS[user_lang]["goodbye"], 
+            reply_markup=get_start_kb()
+        )
     except Exception:
         pass
 
