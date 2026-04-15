@@ -17,6 +17,7 @@ from faq import router as faq_router
 from mini_test import router as test_router
 from onboarding import router as onboarding_router, onboarding_scheduler
 from meeting import router as meeting_router
+from meeting_reminders import meeting_reminder_scheduler
 
 load_dotenv()
 
@@ -59,6 +60,7 @@ async def main():
 
     asyncio.create_task(_run_forever(holiday_checker, bot, name="holiday_checker"))
     asyncio.create_task(_run_forever(onboarding_scheduler, bot, dp, name="onboarding_scheduler"))
+    asyncio.create_task(_run_forever(meeting_reminder_scheduler, bot, name="meeting_reminder_scheduler"))
 
     logger.info("Bot started")
 

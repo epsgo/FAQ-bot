@@ -96,3 +96,47 @@ def get_users_by_role(role: str):
             .where(filter=FieldFilter("role", "==", role))
             .stream())
     return [doc.to_dict() for doc in docs]
+
+meetings_collection = db.collection("meetings")
+
+def create_meeting(requester_id: int, target_id: int, meeting_datetime: str = None, meeting_type: str = "1:1"):
+    meeting_data = {
+        "requester_id": requester_id,
+        "target_id": target_id,
+        "meeting_type": meeting_type,
+        "status": "pending",
+        "created_at": datetime.now().isoformat(),
+        "meeting_datetime": meeting_datetime,
+        "reminder_sent": False
+    }
+    doc_ref = meetings_collection.add(meeting_data)
+    return doc_ref[1].id
+
+def update_meeting_status(meeting_id: str, status: str):
+    meetings_collection.document(meeting_id).update({"status": status})
+
+def update_meeting_datetime(meeting_id: str, meeting_datetime: str):
+    meetings_collection.document(meeting_id).update({"meeting_datetime": meeting_datetime})
+
+def get_meeting(meeting_id: str):
+    doc = meetings_collection.document(meeting_id).get()
+    if doc.exists:
+        data = doc.to_dict()
+        data["id"] = doc.id
+        return data
+    return None
+
+def get_pending_reminders():
+    docs = (meetings_collection
+            .where(filter=FieldFilter("status", "==", "confirmed"))
+            .where(filter=FieldFilter("reminder_sent", "==", False))
+            .stream())
+    result = []
+    for doc in docs:
+        data = doc.to_dict()
+        data["id"] = doc.id
+        result.append(data)
+    return result
+
+def mark_reminder_sent(meeting_id: str):
+    meetings_collection.document(meeting_id).update({"reminder_sent": True})

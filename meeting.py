@@ -1,10 +1,17 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
 from const import MEETING_BTNS, TEXTS
 from keyboards import auth_required
-from db import get_user, get_users_by_role
+from db import get_user, get_users_by_role, create_meeting, update_meeting_status, get_meeting
+from datetime import datetime
 
 router = Router()
+
+
+class MeetingStates(StatesGroup):
+    waiting_for_datetime = State()
 
 
 def t(lang: str, key: str, **kwargs) -> str:
@@ -28,6 +35,13 @@ def _back_kb(lang: str):
     ])
 
 
+def _skip_datetime_kb(lang: str):
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=t(lang, "meet_skip_datetime"), callback_data="meet_skip_datetime")],
+        [InlineKeyboardButton(text=t(lang, "meet_back"), callback_data="meet_back")]
+    ])
+
+
 @router.message(F.text.in_(MEETING_BTNS))
 @auth_required
 async def show_meeting_menu(message: Message, user: dict):
@@ -36,7 +50,8 @@ async def show_meeting_menu(message: Message, user: dict):
 
 
 @router.callback_query(F.data == "meet_back")
-async def meet_back(callback: CallbackQuery):
+async def meet_back(callback: CallbackQuery, state: FSMContext):
+    await state.clear()
     user = get_user(callback.from_user.id)
     lang = user["language"] if user else "en"
     await callback.message.edit_text(t(lang, "meet_menu_title"), reply_markup=_meeting_main_kb(lang))
@@ -75,20 +90,97 @@ async def show_role_users(callback: CallbackQuery):
 
 
 @router.callback_query(F.data.startswith("meet_user_"))
-async def request_meeting(callback: CallbackQuery):
+async def request_meeting_ask_datetime(callback: CallbackQuery, state: FSMContext):
     parts = callback.data.split("_")
     target_id    = int(parts[2])
     requester_id = int(parts[3])
+
+    requester = get_user(requester_id)
+    req_lang  = requester["language"] if requester else "en"
+
+    await state.update_data(target_id=target_id, requester_id=requester_id)
+    await state.set_state(MeetingStates.waiting_for_datetime)
+
+    await callback.message.edit_text(
+        t(req_lang, "meet_ask_datetime"),
+        reply_markup=_skip_datetime_kb(req_lang)
+    )
+    await callback.answer()
+
+
+@router.message(MeetingStates.waiting_for_datetime)
+async def handle_datetime_input(message: Message, state: FSMContext):
+    user = get_user(message.from_user.id)
+    lang = user["language"] if user else "en"
+    
+    datetime_text = message.text.strip()
+    
+    try:
+        meeting_dt = datetime.strptime(datetime_text, "%d.%m.%Y %H:%M")
+        if meeting_dt < datetime.now():
+            await message.answer(
+                t(lang, "meet_invalid_datetime") + "\n\n⚠️ Дата не может быть в прошлом.",
+                reply_markup=_skip_datetime_kb(lang)
+            )
+            return
+        
+        data = await state.get_data()
+        target_id = data.get("target_id")
+        requester_id = data.get("requester_id")
+        
+        requester = get_user(requester_id)
+        target    = get_user(target_id)
+        req_lang  = requester["language"] if requester else "en"
+        tgt_lang  = target["language"]    if target    else "en"
+
+        meeting_id = create_meeting(requester_id, target_id, datetime_text)
+
+        confirm_kb = InlineKeyboardMarkup(inline_keyboard=[
+            [
+                InlineKeyboardButton(text=t(tgt_lang, "meet_btn_confirm"), callback_data=f"meet_confirm_{meeting_id}"),
+                InlineKeyboardButton(text=t(tgt_lang, "meet_btn_decline"), callback_data=f"meet_decline_{meeting_id}"),
+            ]
+        ])
+
+        try:
+            await message.bot.send_message(
+                target_id,
+                t(tgt_lang, "meet_with_datetime", name=requester["full_name"], datetime=datetime_text),
+                reply_markup=confirm_kb,
+                parse_mode="HTML"
+            )
+        except Exception:
+            await message.answer(t(req_lang, "meet_error"))
+            await state.clear()
+            return
+
+        await message.answer(t(req_lang, "meet_datetime_set", datetime=datetime_text))
+        await state.clear()
+        
+    except ValueError:
+        await message.answer(
+            t(lang, "meet_invalid_datetime"),
+            reply_markup=_skip_datetime_kb(lang)
+        )
+
+
+@router.callback_query(F.data == "meet_skip_datetime")
+async def skip_datetime(callback: CallbackQuery, state: FSMContext):
+    data = await state.get_data()
+    target_id = data.get("target_id")
+    requester_id = data.get("requester_id")
 
     requester = get_user(requester_id)
     target    = get_user(target_id)
     req_lang  = requester["language"] if requester else "en"
     tgt_lang  = target["language"]    if target    else "en"
 
+    meeting_id = create_meeting(requester_id, target_id, meeting_datetime=None)
+
     confirm_kb = InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text=t(tgt_lang, "meet_btn_confirm"), callback_data=f"meet_confirm_{requester_id}"),
-            InlineKeyboardButton(text=t(tgt_lang, "meet_btn_decline"), callback_data=f"meet_decline_{requester_id}"),
+            InlineKeyboardButton(text=t(tgt_lang, "meet_btn_confirm"), callback_data=f"meet_confirm_{meeting_id}"),
+            InlineKeyboardButton(text=t(tgt_lang, "meet_btn_decline"), callback_data=f"meet_decline_{meeting_id}"),
         ]
     ])
 
@@ -102,26 +194,44 @@ async def request_meeting(callback: CallbackQuery):
     except Exception:
         await callback.message.edit_text(t(req_lang, "meet_error"), reply_markup=_back_kb(req_lang))
         await callback.answer()
+        await state.clear()
         return
 
     await callback.message.edit_text(t(req_lang, "meet_sent"))
     await callback.answer()
+    await state.clear()
 
 
 @router.callback_query(F.data.startswith("meet_confirm_"))
 async def confirm_meeting(callback: CallbackQuery):
-    requester_id = int(callback.data.split("_")[2])
+    meeting_id = callback.data.split("_")[2]
+    meeting = get_meeting(meeting_id)
+    
+    if not meeting:
+        await callback.answer("Встреча не найдена", show_alert=True)
+        return
+    
+    requester_id = meeting["requester_id"]
     confirmer    = get_user(callback.from_user.id)
     requester    = get_user(requester_id)
     cfm_lang     = confirmer["language"]  if confirmer  else "en"
     req_lang     = requester["language"]  if requester  else "en"
 
+    update_meeting_status(meeting_id, "confirmed")
+
     try:
-        await callback.bot.send_message(
-            requester_id,
-            t(req_lang, "meet_confirmed_by", name=confirmer["full_name"]),
-            parse_mode="HTML"
-        )
+        if meeting.get("meeting_datetime"):
+            await callback.bot.send_message(
+                requester_id,
+                t(req_lang, "meet_confirmed_with_datetime", name=confirmer["full_name"], datetime=meeting["meeting_datetime"]),
+                parse_mode="HTML"
+            )
+        else:
+            await callback.bot.send_message(
+                requester_id,
+                t(req_lang, "meet_confirmed_by", name=confirmer["full_name"]),
+                parse_mode="HTML"
+            )
     except Exception:
         pass
 
@@ -131,18 +241,34 @@ async def confirm_meeting(callback: CallbackQuery):
 
 @router.callback_query(F.data.startswith("meet_decline_"))
 async def decline_meeting(callback: CallbackQuery):
-    requester_id = int(callback.data.split("_")[2])
+    meeting_id = callback.data.split("_")[2]
+    meeting = get_meeting(meeting_id)
+    
+    if not meeting:
+        await callback.answer("Встреча не найдена", show_alert=True)
+        return
+    
+    requester_id = meeting["requester_id"]
     decliner     = get_user(callback.from_user.id)
     requester    = get_user(requester_id)
     dcl_lang     = decliner["language"]  if decliner  else "en"
     req_lang     = requester["language"] if requester else "en"
 
+    update_meeting_status(meeting_id, "declined")
+
     try:
-        await callback.bot.send_message(
-            requester_id,
-            t(req_lang, "meet_declined_by", name=decliner["full_name"]),
-            parse_mode="HTML"
-        )
+        if meeting.get("meeting_datetime"):
+            await callback.bot.send_message(
+                requester_id,
+                t(req_lang, "meet_declined_with_datetime", name=decliner["full_name"], datetime=meeting["meeting_datetime"]),
+                parse_mode="HTML"
+            )
+        else:
+            await callback.bot.send_message(
+                requester_id,
+                t(req_lang, "meet_declined_by", name=decliner["full_name"]),
+                parse_mode="HTML"
+            )
     except Exception:
         pass
 
