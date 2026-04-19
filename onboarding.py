@@ -362,6 +362,9 @@ async def send_stage(bot: Bot, dp: Dispatcher, user: dict, stage: int):
 
 
 async def check_user_onboarding(bot: Bot, dp: Dispatcher, user: dict):
+    if user.get("role") in ("manager", "teamlead"):
+        return
+
     created_at = datetime.fromisoformat(user["created_at"])
     days_since = (datetime.now() - created_at).days
     current_stage = user.get("onboarding_stage", 0)
@@ -397,4 +400,8 @@ async def onboarding_scheduler(bot: Bot, dp: Dispatcher):
             continue
 
         for user in users:
+            if user.get("role") in ("manager", "teamlead"):
+                if 0 < user.get("onboarding_stage", 0) < 4:
+                    update_onboarding_stage(user["user_id"], 4)
+                continue
             await check_user_onboarding(bot, dp, user)
