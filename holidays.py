@@ -28,6 +28,8 @@ async def wait_until(target: datetime):
 
 
 async def holiday_checker(bot):
+    next_date = date.today()
+
     while True:
         now = datetime.now()
 
@@ -35,16 +37,25 @@ async def holiday_checker(bot):
         random_minute = random.randint(0, 59)
 
         target_time = datetime.combine(
-            now.date(),
+            next_date,
             time(hour=random_hour, minute=random_minute)
         )
 
+        # If the chosen time today has already passed, greet tomorrow instead.
         if target_time <= now:
-            target_time += timedelta(days=1)
+            next_date += timedelta(days=1)
+            target_time = datetime.combine(
+                next_date,
+                time(hour=random_hour, minute=random_minute)
+            )
 
         await wait_until(target_time)
 
         today = date.today()
+
+        # Schedule the next run for the day after the one we just handled,
+        # so each day is greeted exactly once.
+        next_date = today + timedelta(days=1)
         try:
             users = all_users()
         except Exception as e:
